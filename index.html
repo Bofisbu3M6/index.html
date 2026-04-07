@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bofisbu.shopfile.site | v5.4 Card Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap');
+        body { font-family: 'Lexend', sans-serif; background-color: #0b1120; color: #e2e8f0; }
+        .sidebar { width: 220px; background: #0f172a; height: 100vh; position: fixed; left: 0; top: 0; border-right: 1px solid #1e293b; z-index: 100; transition: 0.3s; display: flex; flex-direction: column; }
+        .sidebar.closed { left: -220px; }
+        .main-content { margin-left: 220px; padding: 20px; transition: 0.3s; }
+        .main-content.full { margin-left: 0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .input-dark { background: #1e293b; border: 1px solid #334155; padding: 8px; border-radius: 6px; outline: none; width: 100%; font-size: 12px; color: white; transition: 0.2s; }
+        .input-dark:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .btn-blue { background: #3b82f6; padding: 8px; border-radius: 6px; font-weight: bold; width: 100%; font-size: 13px; cursor: pointer; }
+        .hidden { display: none; }
+        .cat-link { display: flex; align-items: center; padding: 8px 12px; border-radius: 8px; font-size: 13px; transition: 0.2s; color: #94a3b8; cursor: pointer; }
+        .cat-link:hover, .cat-link.active { background: #1e293b; color: #3b82f6; }
+    </style>
+</head>
+<body>
+
+    <button id="openSidebar" onclick="toggleSidebar()" class="fixed left-4 top-4 bg-blue-600 p-2 rounded-lg z-[90] hidden"><i class="fas fa-bars"></i></button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="p-4 flex justify-between items-center border-b border-slate-800">
+            <h1 class="text-xl font-black text-blue-500">BOFISBU</h1>
+            <button onclick="toggleSidebar()" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="auth-section" class="p-4 border-b border-slate-800">
+            <div class="space-y-2">
+                <input type="text" id="sideU" placeholder="Username" class="input-dark">
+                <input type="password" id="sideP" placeholder="Password" class="input-dark">
+                <button onclick="handleSideAuth()" class="btn-blue">ĐĂNG NHẬP / ĐK</button>
+            </div>
+        </div>
+
+        <div id="user-section" class="p-4 border-b border-slate-800 hidden">
+            <p id="userNameDisplay" class="font-bold text-blue-400 text-sm truncate uppercase"></p>
+            <p id="userUID" class="text-[10px] text-yellow-500 font-mono mb-2"></p>
+            <div class="bg-slate-900/50 p-2 rounded text-xs flex justify-between border border-slate-700">
+                <span class="text-slate-400">Ví:</span> <span id="userCashDisplay" class="text-green-400 font-black">0đ</span>
+            </div>
+            <button onclick="logout()" class="mt-3 w-full py-1 text-[10px] bg-red-500/10 text-red-400 rounded">Đăng xuất</button>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1">
+            <p class="px-3 text-[10px] text-slate-500 font-bold uppercase mt-2 mb-1">Cửa hàng</p>
+            <a onclick="filterCat('all')" class="cat-link active" id="cat-all"><i class="fas fa-th w-6"></i> Tất cả</a>
+            <a onclick="filterCat('Aimlock')" class="cat-link" id="cat-Aimlock"><i class="fas fa-crosshairs w-6"></i> Aimlock</a>
+            <a onclick="filterCat('Data')" class="cat-link" id="cat-Data"><i class="fas fa-database w-6"></i> Data</a>
+            <a onclick="filterCat('Menu')" class="cat-link" id="cat-Menu"><i class="fas fa-list w-6"></i> Menu VIP</a>
+            <a onclick="filterCat('Panel')" class="cat-link" id="cat-Panel"><i class="fas fa-desktop w-6"></i> Panel</a>
+            <p class="px-3 text-[10px] text-slate-500 font-bold uppercase mt-4 mb-1">Nạp Tiền</p>
+            <a onclick="showPage('topup')" class="cat-link"><i class="fas fa-credit-card w-6"></i> Nạp Thẻ / Bank</a>
+            <a onclick="showPage('history')" class="cat-link"><i class="fas fa-history w-6"></i> Lịch sử mua</a>
+            <div id="adminMenu" class="hidden border-t border-slate-800 mt-4 pt-4">
+                <a onclick="showPage('admin')" class="cat-link text-red-500 font-bold"><i class="fas fa-user-shield w-6"></i> QUẢN TRỊ</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="flex justify-between items-center mb-6">
+            <h2 id="pageTitle" class="text-xl font-bold uppercase">Sản phẩm mới nhất</h2>
+            <div id="headerUID" class="text-[10px] bg-slate-800 px-3 py-1 rounded-full text-slate-400 font-mono">ID: -----</div>
+        </header>
+
+        <div id="page-home" class="page-view">
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <div id="page-topup" class="page-view hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass p-6 rounded-2xl border border-orange-500/20">
+                    <h3 class="text-sm font-bold text-orange-400 mb-5 uppercase italic"><i class="fas fa-ticket-alt mr-2"></i>Nạp Thẻ Cào (Auto 1s)</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400">LOẠI THẺ</label>
+                            <select id="cardNet" class="input-dark mt-1">
+                                <option value="VIETTEL">Viettel</option>
+                                <option value="VINAPHONE">Vinaphone</option>
+                                <option value="MOBIFONE">Mobifone</option>
+                                <option value="ZING">Zing (Game)</option>
+                                <option value="GARENA">Garena</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400">MỆNH GIÁ (SAI MỆNH GIÁ MẤT THẺ)</label>
+                            <select id="cardVal" class="input-dark mt-1 text-yellow-400 font-bold">
+                                <option value="10000">10,000đ</option>
+                                <option value="20000">20,000đ</option>
+                                <option value="50000">50,000đ</option>
+                                <option value="100000">100,000đ</option>
+                                <option value="200000">200,000đ</option>
+                                <option value="500000">500,000đ</option>
+                                <option value="1000000">1,000,000đ</option>
+                            </select>
+                        </div>
+                        <input type="text" id="cardSeri" placeholder="Số Seri" class="input-dark">
+                        <input type="text" id="cardCode" placeholder="Mã thẻ" class="input-dark">
+                        <button onclick="handleCardTopup()" class="btn-blue bg-orange-600 shadow-lg shadow-orange-900/20">NẠP THẺ NGAY</button>
+                        <p class="text-[10px] text-red-400 italic font-medium">* Lưu ý: Chọn sai mệnh giá hệ thống không hoàn tiền và không cộng tiền vào tài khoản.</p>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-2xl text-center border border-blue-500/20">
+                    <h3 class="text-sm font-bold text-blue-400 mb-5 uppercase">Quét Mã QR Bank</h3>
+                    <img id="bankQR" src="" class="w-40 h-40 rounded-lg border-4 border-white mb-4 mx-auto bg-white p-1">
+                    <div class="text-left bg-slate-900/50 p-3 rounded-lg text-[11px] space-y-1 font-medium border border-slate-700">
+                        <p>Ngân hàng: <b class="text-blue-400">Vietcombank</b></p>
+                        <p>Số tài khoản: <b>1027195845</b></p>
+                        <p>Chủ TK: <b>NGUYEN THANH KIEU VA NGUYEN HOANG LONG</b></p>
+                        <p>Nội dung: <b id="bankContent" class="text-yellow-400">---</b></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-history" class="page-view hidden">
+            <div id="historyList" class="space-y-3"></div>
+        </div>
+
+        <div id="page-admin" class="page-view hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass p-6 rounded-2xl border border-red-500/20">
+                    <h4 class="text-xs font-bold mb-4 uppercase text-red-400">Quản lý nội dung</h4>
+                    <div class="space-y-3">
+                        <input type="text" id="admPName" placeholder="Tên sản phẩm..." class="input-dark">
+                        <input type="number" id="admPPrice" placeholder="Giá..." class="input-dark">
+                        <select id="admPCat" class="input-dark">
+                            <option value="Aimlock">Aimlock</option><option value="Data">Data</option>
+                            <option value="Menu">Menu VIP</option><option value="Panel">Panel</option>
+                        </select>
+                        <input type="file" id="admPImg" accept="image/*" class="input-dark text-[10px]">
+                        <input type="file" id="admPFile" class="input-dark text-[10px]">
+                        <button onclick="adminAddProduct()" id="btnPost" class="btn-blue bg-red-600">ĐĂNG FILE</button>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-green-500/20">
+                    <h4 class="text-xs font-bold mb-4 uppercase text-green-400">Cộng tiền UID</h4>
+                    <input type="text" id="admTargetUID" placeholder="Mã UID khách..." class="input-dark mb-2">
+                    <input type="number" id="admAmount" placeholder="Số tiền..." class="input-dark mb-2">
+                    <button onclick="adminAddMoney()" class="btn-blue bg-green-600">XÁC NHẬN CỘNG</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- DATA ---
+        let users = JSON.parse(localStorage.getItem('b_v54_users')) || [
+            { user: 'Bofisbudevshop', pass: 'shopdevnguyenlong', role: 'admin', cash: 0, uid: 'ADMIN-MASTER', history: [] }
+        ];
+        let products = JSON.parse(localStorage.getItem('b_v54_products')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('b_v54_session')) || null;
+        let currentFilter = 'all';
+
+        window.onload = () => { updateUI(); renderProducts(); renderHistory(); };
+
+        function sync() {
+            localStorage.setItem('b_v54_users', JSON.stringify(users));
+            localStorage.setItem('b_v54_products', JSON.stringify(products));
+            if(currentUser) localStorage.setItem('b_v54_session', JSON.stringify(currentUser));
+            else localStorage.removeItem('b_v54_session');
+        }
+
+        // --- NẠP THẺ (LOGIC) ---
+        function handleCardTopup() {
+            if(!currentUser) return alert("Vui lòng đăng nhập để nạp thẻ!");
+            
+            const seri = document.getElementById('cardSeri').value.trim();
+            const code = document.getElementById('cardCode').value.trim();
+            const val = parseInt(document.getElementById('cardVal').value);
+            const net = document.getElementById('cardNet').value;
+
+            if(!seri || !code) return alert("Vui lòng nhập đầy đủ Số Seri và Mã Thẻ!");
+
+            // Giả lập check thẻ (Trong thực tế sẽ gọi API gạch thẻ)
+            // Ở đây ta quy định: Nếu mã thẻ kết thúc bằng số "0", coi như nạp sai mệnh giá (giả lập rủi ro)
+            alert("Hệ thống đang xử lý thẻ " + net + " mệnh giá " + val.toLocaleString() + "đ...");
+
+            setTimeout(() => {
+                const isWrongValue = code.endsWith("0"); // Giả định thẻ kết thúc bằng 0 là sai mệnh giá
+
+                if(isWrongValue) {
+                    alert("LỖI: Thẻ sai mệnh giá hoặc đã bị sử dụng! Bạn chọn " + val.toLocaleString() + "đ nhưng giá trị thực tế của thẻ khác. Tiền không được cộng.");
+                } else {
+                    // Cộng tiền thật
+                    let uIdx = users.findIndex(u => u.user === currentUser.user);
+                    users[uIdx].cash += val;
+                    sync();
+                    updateUI();
+                    alert("Thành công! Đã cộng " + val.toLocaleString() + "đ vào tài khoản.");
+                    document.getElementById('cardSeri').value = "";
+                    document.getElementById('cardCode').value = "";
+                }
+            }, 2000);
+        }
+
+        // --- UI & AUTH ---
+        function updateUI() {
+            if(currentUser) {
+                const fresh = users.find(u => u.user === currentUser.user);
+                if(fresh) currentUser = fresh;
+                document.getElementById('user-section').classList.remove('hidden');
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('userNameDisplay').innerText = currentUser.user;
+                document.getElementById('userUID').innerText = "Mã KH: " + currentUser.uid;
+                document.getElementById('headerUID').innerText = "ID: " + currentUser.uid;
+                document.getElementById('userCashDisplay').innerText = currentUser.cash.toLocaleString() + "đ";
+                document.getElementById('bankContent').innerText = currentUser.uid;
+                document.getElementById('bankQR').src = `https://img.vietqr.io/image/VCB-1027195845-compact2.png?amount=0&addInfo=${currentUser.uid}&accountName=NGUYEN%20HOANG%20LONG`;
+                if(currentUser.role === 'admin') document.getElementById('adminMenu').classList.remove('hidden');
+            } else {
+                document.getElementById('user-section').classList.add('hidden');
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('adminMenu').classList.add('hidden');
+            }
+        }
+
+        function handleSideAuth() {
+            const u = document.getElementById('sideU').value.trim();
+            const p = document.getElementById('sideP').value.trim();
+            if(!u || !p) return alert("Nhập đủ thông tin!");
+            
+            const found = users.find(x => x.user === u && x.pass === p);
+            if(found) {
+                currentUser = found; sync(); updateUI(); alert("Đăng nhập thành công!");
+            } else {
+                const uid = Math.floor(1000 + Math.random() * 9000) + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+                const role = (u === 'Bofisbudevshop') ? 'admin' : 'user';
+                users.push({ user: u, pass: p, role, cash: 0, uid, history: [] });
+                sync(); alert("Đăng ký thành công!"); handleSideAuth();
+            }
+        }
+
+        function logout() { currentUser = null; sync(); location.reload(); }
+
+        // --- PRODUCT MGMT ---
+        async function adminAddProduct() {
+            const name = document.getElementById('admPName').value;
+            const price = parseInt(document.getElementById('admPPrice').value);
+            const cat = document.getElementById('admPCat').value;
+            const img = document.getElementById('admPImg').files[0];
+            const zip = document.getElementById('admPFile').files[0];
+            if(!name || !img || !zip) return alert("Thiếu dữ liệu!");
+            
+            const toB64 = f => new Promise((res) => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); });
+            const imgData = await toB64(img);
+            const zipData = await toB64(zip);
+            
+            products.unshift({ id: Date.now(), name, price, cat, img: imgData, file: zipData });
+            sync(); alert("Đã đăng!"); location.reload();
+        }
+
+        function adminAddMoney() {
+            const uid = document.getElementById('admTargetUID').value.trim();
+            const amt = parseInt(document.getElementById('admAmount').value);
+            let idx = users.findIndex(u => u.uid === uid);
+            if(idx !== -1) { users[idx].cash += amt; sync(); updateUI(); alert("Đã cộng tiền!"); }
+            else alert("Sai UID!");
+        }
+
+        function buyProduct(id) {
+            if(!currentUser) return alert("Hãy đăng nhập!");
+            const p = products.find(x => x.id === id);
+            if(currentUser.cash < p.price) return alert("Không đủ tiền!");
+            if(confirm("Xác nhận mua?")) {
+                currentUser.cash -= p.price;
+                currentUser.history.unshift({ name: p.name, date: new Date().toLocaleString(), file: p.file });
+                let idx = users.findIndex(u => u.user === currentUser.user);
+                users[idx] = currentUser;
+                sync(); updateUI(); renderHistory(); alert("Thành công!");
+            }
+        }
+
+        function renderProducts() {
+            const g = document.getElementById('productGrid');
+            const list = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+            g.innerHTML = list.map(p => `
+                <div class="glass p-3 rounded-xl border border-slate-800 relative">
+                    ${(currentUser && currentUser.role === 'admin') ? `<button onclick="deleteProduct(${p.id})" class="absolute -top-2 -right-2 bg-red-600 w-5 h-5 rounded-full text-[10px]">X</button>` : ''}
+                    <img src="${p.img}" class="w-full h-32 object-cover rounded-lg mb-2">
+                    <h3 class="font-bold text-xs truncate">${p.name}</h3>
+                    <p class="text-green-400 font-bold text-sm">${p.price.toLocaleString()}đ</p>
+                    <button onclick="buyProduct(${p.id})" class="w-full mt-2 py-2 bg-blue-600 rounded-lg text-[10px] font-bold">MUA NGAY</button>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory() {
+            const h = document.getElementById('historyList');
+            if(!currentUser || currentUser.history.length === 0) return h.innerHTML = "<p class='text-center opacity-50'>Trống.</p>";
+            h.innerHTML = currentUser.history.map(item => `<div class="glass p-3 rounded-xl flex justify-between items-center border-l-4 border-blue-500"><div class="text-[11px]"><b>${item.name}</b><br><span class="opacity-50">${item.date}</span></div><a href="${item.file}" download class="bg-green-600 px-3 py-1.5 rounded text-[10px] font-bold">TẢI XUỐNG</a></div>`).join('');
+        }
+
+        function deleteProduct(id) { products = products.filter(p => p.id !== id); sync(); renderProducts(); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); document.getElementById('main-content').classList.toggle('full'); document.getElementById('openSidebar').classList.toggle('hidden'); }
+        function showPage(id) { document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden')); document.getElementById('page-' + id).classList.remove('hidden'); if(window.innerWidth < 768) toggleSidebar(); }
+        function filterCat(cat) { currentFilter = cat; showPage('home'); document.querySelectorAll('.cat-link').forEach(l => l.classList.remove('active')); if(document.getElementById('cat-'+cat)) document.getElementById('cat-'+cat).classList.add('active'); renderProducts(); }
+    </script>
+</body>
+</html>
