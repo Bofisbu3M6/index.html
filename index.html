@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bofisbu.shopfile.site | v6.0 Diamond</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap');
+        body { font-family: 'Lexend', sans-serif; background-color: #0b1120; color: #e2e8f0; }
+        .sidebar { width: 230px; background: #0f172a; height: 100vh; position: fixed; left: 0; top: 0; border-right: 1px solid #1e293b; z-index: 100; transition: 0.3s; display: flex; flex-direction: column; }
+        .sidebar.closed { left: -230px; }
+        .main-content { margin-left: 230px; padding: 20px; transition: 0.3s; }
+        .main-content.full { margin-left: 0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .input-dark { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 8px; outline: none; width: 100%; font-size: 12px; color: white; }
+        .btn-blue { background: #3b82f6; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 13px; cursor: pointer; transition: 0.2s; text-align: center; }
+        .cat-link { display: flex; align-items: center; padding: 10px 14px; border-radius: 10px; font-size: 13px; transition: 0.2s; color: #94a3b8; cursor: pointer; margin-bottom: 2px; }
+        .cat-link:hover, .cat-link.active { background: #1e293b; color: #3b82f6; }
+        .bank-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; border-radius: 20px; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <button id="openSidebar" onclick="toggleSidebar()" class="fixed left-4 top-4 bg-blue-600 p-2 rounded-lg z-[90] hidden"><i class="fas fa-bars"></i></button>
+
+    <aside class="sidebar shadow-2xl" id="sidebar">
+        <div class="p-5 flex justify-between items-center border-b border-slate-800">
+            <h1 class="text-xl font-black text-blue-500 italic">BOFISBU</h1>
+            <button onclick="toggleSidebar()" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="auth-section" class="p-4 border-b border-slate-800">
+            <input type="text" id="sideU" placeholder="Tên đăng nhập..." class="input-dark mb-2">
+            <input type="password" id="sideP" placeholder="Mật khẩu..." class="input-dark mb-2">
+            <button onclick="handleSideAuth()" class="btn-blue w-full uppercase">Vào Cửa Hàng</button>
+        </div>
+
+        <div id="user-section" class="p-4 border-b border-slate-800 hidden">
+            <p id="userNameDisplay" class="font-bold text-sm text-blue-400 uppercase truncate mb-1"></p>
+            <div class="bg-slate-900/80 p-2 rounded-lg text-[10px] flex justify-between border border-slate-700">
+                <span class="text-slate-400">Ví:</span> <span id="userCashDisplay" class="text-green-400 font-black">0đ</span>
+            </div>
+            <button onclick="logout()" class="mt-2 w-full py-1 text-[10px] bg-red-500/10 text-red-400 rounded">Đăng xuất</button>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+            <a onclick="filterCat('all')" class="cat-link active" id="cat-all"><i class="fas fa-home w-6"></i> Trang Chủ</a>
+            <p class="px-3 text-[9px] text-slate-600 font-bold uppercase mt-4 mb-1">Nạp Tiền</p>
+            <a onclick="showPage('topupCard')" class="cat-link"><i class="fas fa-credit-card w-6"></i> Thẻ Cào Auto</a>
+            <a onclick="showPage('topupBank')" class="cat-link"><i class="fas fa-university w-6 text-yellow-500"></i> Ngân Hàng / MoMo</a>
+            
+            <p class="px-3 text-[9px] text-slate-600 font-bold uppercase mt-4 mb-1">Cá Nhân</p>
+            <a onclick="showPage('history')" class="cat-link"><i class="fas fa-shopping-bag w-6"></i> File Đã Mua</a>
+            
+            <div id="adminMenu" class="hidden border-t border-slate-800 mt-4 pt-4">
+                <a onclick="showPage('admin')" class="cat-link text-red-400 font-bold"><i class="fas fa-user-shield w-6"></i> QUẢN TRỊ VIÊN</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="flex justify-between items-center mb-8">
+            <h2 id="pageTitle" class="text-2xl font-bold uppercase">Sản phẩm</h2>
+            <div id="headerUID" class="text-[11px] bg-slate-800/80 px-4 py-2 rounded-xl text-blue-400 border border-slate-700 font-mono">ID: -----</div>
+        </header>
+
+        <div id="page-home" class="page-view">
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <div id="page-topupCard" class="page-view hidden">
+            <div class="glass p-8 rounded-3xl border border-blue-500/10 max-w-xl mx-auto">
+                <h3 class="font-bold text-lg mb-6 text-center text-blue-400">Nạp Thẻ Cào (Autocard1s)</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="cardNet" class="input-dark">
+                            <option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option>
+                            <option value="MOBIFONE">MOBIFONE</option><option value="GARENA">GARENA</option>
+                            <option value="ZING">ZING (VINAGAME)</option><option value="VCOIN">VCOIN</option>
+                        </select>
+                        <select id="cardVal" class="input-dark">
+                            <option value="10000">10,000đ</option><option value="20000">20,000đ</option>
+                            <option value="50000">50,000đ</option><option value="100000">100,000đ</option>
+                            <option value="200000">200,000đ</option><option value="500000">500,000đ</option>
+                        </select>
+                    </div>
+                    <input type="text" id="cardSeri" placeholder="Số Seri thẻ" class="input-dark">
+                    <input type="text" id="cardCode" placeholder="Mã thẻ (PIN)" class="input-dark">
+                    <button onclick="handleCardTopup()" class="btn-blue w-full">GỬI THẺ DUYỆT NGAY</button>
+                    <p class="text-[10px] text-slate-500 italic text-center">Lưu ý: Chọn sai mệnh giá sẽ bị mất thẻ.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-topupBank" class="page-view hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div class="bank-card">
+                    <div class="flex justify-between items-start mb-6">
+                        <img src="https://img.vietqr.io/image/vietinbank-logo.png" class="h-6">
+                        <span class="text-[10px] text-blue-400 font-bold uppercase">VietinBank</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-1 uppercase tracking-widest">Số Tài Khoản</p>
+                    <p class="text-xl font-bold text-white mb-4">1038 7522 1386</p>
+                    <p class="text-xs text-slate-400 mb-1 uppercase tracking-widest">Chủ Tài Khoản</p>
+                    <p class="text-sm font-bold text-white mb-4 uppercase">NGUYEN VAN LONG</p>
+                    <div class="p-3 bg-blue-600/10 border border-blue-500/20 rounded-lg">
+                        <p class="text-[10px] text-slate-400">Nội dung chuyển khoản (Bắt buộc):</p>
+                        <p id="bankContent" class="text-sm font-bold text-yellow-500">NAP <span class="uid-text">UID</span></p>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-3xl flex flex-col items-center justify-center border border-slate-800">
+                    <p class="text-xs font-bold mb-4 uppercase">Quét mã QR để nạp nhanh</p>
+                    <img id="qrBank" src="https://img.vietqr.io/image/vietinbank-103875221386-compact.jpg" class="w-48 rounded-xl border-4 border-white">
+                    <p class="text-[10px] text-slate-500 mt-4 italic">Hệ thống tự động cộng tiền sau 1-3 phút</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-admin" class="page-view hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass p-6 rounded-2xl border border-green-500/20">
+                    <h4 class="text-xs font-bold mb-4 text-green-400 uppercase">Quản lý số dư & Thành viên</h4>
+                    <input type="text" id="admTargetUID" placeholder="Mã UID khách..." class="input-dark mb-2">
+                    <input type="number" id="admAmount" placeholder="Số tiền..." class="input-dark mb-4">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="adminAddMoney()" class="btn-blue bg-green-600">CỘNG TIỀN</button>
+                        <button onclick="adminSetRole()" class="btn-blue bg-orange-600">SÉT ADMIN</button>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-red-500/20">
+                    <h4 class="text-xs font-bold mb-4 text-red-400 uppercase">Thêm Sản Phẩm Mới</h4>
+                    <input type="text" id="admPName" placeholder="Tên File..." class="input-dark mb-2">
+                    <input type="number" id="admPPrice" placeholder="Giá..." class="input-dark mb-2">
+                    <select id="admPCat" class="input-dark mb-2"><option value="Aimlock">Aimlock</option><option value="Data">Data</option></select>
+                    <input type="file" id="admPImg" accept="image/*" class="input-dark mb-2 text-[10px]">
+                    <input type="file" id="admPFile" class="input-dark mb-4 text-[10px]">
+                    <button onclick="adminAddProduct()" class="btn-blue bg-red-600 w-full">ĐĂNG BÁN</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-history" class="page-view hidden"><div id="historyList" class="grid gap-4"></div></div>
+    </main>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('b_v60_u')) || [
+            { user: 'Bofisbudevshop', pass: 'shopdevnguyenlong', role: 'admin', cash: 0, uid: 'ADMIN-MASTER', history: [] }
+        ];
+        let products = JSON.parse(localStorage.getItem('b_v60_p')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('b_v60_s')) || null;
+
+        window.onload = () => { updateUI(); renderProducts(); renderHistory(); };
+
+        function sync() {
+            localStorage.setItem('b_v60_u', JSON.stringify(users));
+            localStorage.setItem('b_v60_p', JSON.stringify(products));
+            if(currentUser) localStorage.setItem('b_v60_s', JSON.stringify(currentUser));
+            else localStorage.removeItem('b_v60_s');
+        }
+
+        // --- ADMIN SET ROLE ---
+        function adminSetRole() {
+            const uid = document.getElementById('admTargetUID').value;
+            if(!uid) return alert("Vui lòng nhập UID!");
+            let idx = users.findIndex(u => u.uid === uid);
+            if(idx !== -1) {
+                users[idx].role = 'admin';
+                sync();
+                alert(`Đã cấp quyền QUẢN TRỊ VIÊN cho khách hàng ${users[idx].user}!`);
+            } else alert("Không tìm thấy khách hàng này.");
+        }
+
+        function adminAddMoney() {
+            const uid = document.getElementById('admTargetUID').value;
+            const amt = parseInt(document.getElementById('admAmount').value);
+            let idx = users.findIndex(u => u.uid === uid);
+            if(idx !== -1) {
+                users[idx].cash += amt;
+                sync();
+                updateUI();
+                alert("Cộng tiền thành công!");
+            } else alert("Sai UID!");
+        }
+
+        // --- NẠP THÈ ---
+        function handleCardTopup() {
+            if(!currentUser) return alert("Đăng nhập đi bạn!");
+            const seri = document.getElementById('cardSeri').value;
+            const code = document.getElementById('cardCode').value;
+            if(!seri || !code) return alert("Nhập đủ Seri/Mã thẻ!");
+            
+            alert("Đã gửi thẻ lên hệ thống Autocard1s. Vui lòng chờ 30s...");
+            setTimeout(() => {
+                const val = parseInt(document.getElementById('cardVal').value);
+                let idx = users.findIndex(u => u.user === currentUser.user);
+                users[idx].cash += val;
+                sync(); updateUI();
+                alert("Thẻ thành công! Tiền đã được cộng.");
+            }, 2000);
+        }
+
+        // --- CORE ---
+        function updateUI() {
+            if(currentUser) {
+                const fresh = users.find(u => u.user === currentUser.user);
+                if(fresh) currentUser = fresh;
+                document.getElementById('user-section').classList.remove('hidden');
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('userNameDisplay').innerText = currentUser.user;
+                document.getElementById('userCashDisplay').innerText = currentUser.cash.toLocaleString() + "đ";
+                document.getElementById('headerUID').innerText = "UID: " + currentUser.uid;
+                
+                // Cập nhật QR & Nội dung bank
+                document.querySelectorAll('.uid-text').forEach(e => e.innerText = currentUser.uid);
+                document.getElementById('qrBank').src = `https://img.vietqr.io/image/vietinbank-103875221386-compact.jpg?addTag=NAP%20${currentUser.uid}`;
+
+                if(currentUser.role === 'admin') document.getElementById('adminMenu').classList.remove('hidden');
+                else document.getElementById('adminMenu').classList.add('hidden');
+            }
+        }
+
+        function handleSideAuth() {
+            const u = document.getElementById('sideU').value.trim();
+            const p = document.getElementById('sideP').value.trim();
+            if(!u || !p) return;
+            const f = users.find(x => x.user === u && x.pass === p);
+            if(f) { currentUser = f; sync(); updateUI(); renderHistory(); }
+            else {
+                if(users.find(x => x.user === u)) return alert("Sai mật khẩu!");
+                const uid = Math.floor(1000 + Math.random() * 9000).toString();
+                users.push({ user: u, pass: p, role: (u === 'Bofisbudevshop' ? 'admin' : 'user'), cash: 0, uid, history: [] });
+                sync(); handleSideAuth();
+            }
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + id).classList.remove('hidden');
+            document.getElementById('pageTitle').innerText = id.replace('topup', 'NẠP ').toUpperCase();
+            if(window.innerWidth < 768) toggleSidebar();
+        }
+
+        function renderProducts() {
+            const g = document.getElementById('productGrid');
+            g.innerHTML = products.map(p => `
+                <div class="glass p-4 rounded-3xl border border-slate-800 relative group overflow-hidden">
+                    ${(currentUser && currentUser.role === 'admin') ? `<button onclick="deleteProduct(${p.id})" class="absolute top-2 right-2 bg-red-600/80 w-6 h-6 rounded-full text-[10px] z-10"><i class="fas fa-trash"></i></button>` : ''}
+                    <img src="${p.img}" class="w-full h-32 object-cover rounded-2xl mb-3">
+                    <h3 class="font-bold text-xs truncate">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="text-green-400 font-bold">${p.price.toLocaleString()}đ</span>
+                        <button onclick="buyProduct(${p.id})" class="bg-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">MUA</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function adminAddProduct() {
+            const n = document.getElementById('admPName').value;
+            const p = parseInt(document.getElementById('admPPrice').value);
+            const c = document.getElementById('admPCat').value;
+            const img = document.getElementById('admPImg').files[0];
+            const zip = document.getElementById('admPFile').files[0];
+            if(!n || !img || !zip) return alert("Thiếu info!");
+            const toB64 = f => new Promise(r => { const rd = new FileReader(); rd.readAsDataURL(f); rd.onload = () => r(rd.result); });
+            products.unshift({ id: Date.now(), name: n, price: p, cat: c, img: await toB64(img), file: await toB64(zip) });
+            sync(); renderProducts(); alert("Đã đăng!");
+        }
+
+        function buyProduct(id) {
+            if(!currentUser) return alert("Login đi!");
+            const p = products.find(x => x.id === id);
+            if(currentUser.cash < p.price) return alert("Hết tiền!");
+            currentUser.cash -= p.price;
+            currentUser.history.unshift({ name: p.name, date: new Date().toLocaleString(), file: p.file });
+            let i = users.findIndex(u => u.user === currentUser.user);
+            users[i] = currentUser; sync(); updateUI(); renderHistory(); alert("Đã mua!");
+        }
+
+        function renderHistory() {
+            const h = document.getElementById('historyList');
+            if(!currentUser) return;
+            h.innerHTML = currentUser.history.map(item => `<div class="glass p-4 rounded-xl flex justify-between"><span>${item.name}</span><a href="${item.file}" download class="text-blue-500 font-bold">TẢI VỀ</a></div>`).join('');
+        }
+
+        function logout() { currentUser = null; sync(); location.reload(); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); document.getElementById('main-content').classList.toggle('full'); document.getElementById('openSidebar').classList.toggle('hidden'); }
+    </script>
+</body>
+</html>
