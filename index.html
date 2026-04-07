@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bofisbu.shopfile.site | v6.1 Custom</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap');
+        body { font-family: 'Lexend', sans-serif; background-color: #0b1120; color: #e2e8f0; }
+        .sidebar { width: 230px; background: #0f172a; height: 100vh; position: fixed; left: 0; top: 0; border-right: 1px solid #1e293b; z-index: 100; transition: 0.3s; display: flex; flex-direction: column; }
+        .sidebar.closed { left: -230px; }
+        .main-content { margin-left: 230px; padding: 20px; transition: 0.3s; }
+        .main-content.full { margin-left: 0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .input-dark { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 8px; outline: none; width: 100%; font-size: 12px; color: white; }
+        .btn-blue { background: #3b82f6; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .cat-link { display: flex; align-items: center; padding: 10px 14px; border-radius: 10px; font-size: 13px; transition: 0.2s; color: #94a3b8; cursor: pointer; margin-bottom: 2px; }
+        .cat-link:hover, .cat-link.active { background: #1e293b; color: #3b82f6; }
+        .admin-label { font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 4px; display: block; text-transform: uppercase; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-bold; }
+    </style>
+</head>
+<body>
+
+    <button id="openSidebar" onclick="toggleSidebar()" class="fixed left-4 top-4 bg-blue-600 p-2 rounded-lg z-[90] hidden"><i class="fas fa-bars"></i></button>
+
+    <aside class="sidebar shadow-2xl" id="sidebar">
+        <div class="p-5 flex justify-between items-center border-b border-slate-800">
+            <h1 class="text-xl font-black text-blue-500 italic">BOFISBU</h1>
+            <button onclick="toggleSidebar()" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div id="auth-section" class="p-4 border-b border-slate-800">
+            <input type="text" id="sideU" placeholder="Tên đăng nhập..." class="input-dark mb-2">
+            <input type="password" id="sideP" placeholder="Mật khẩu..." class="input-dark mb-2">
+            <button onclick="handleSideAuth()" class="btn-blue w-full uppercase">Đăng nhập / ĐK</button>
+        </div>
+
+        <div id="user-section" class="p-4 border-b border-slate-800 hidden">
+            <p id="userNameDisplay" class="font-bold text-sm text-blue-400 uppercase truncate mb-1"></p>
+            <div class="bg-slate-900/80 p-2 rounded-lg text-xs flex justify-between border border-slate-700">
+                <span class="text-slate-400">Ví:</span> <span id="userCashDisplay" class="text-green-400 font-black">0đ</span>
+            </div>
+            <button onclick="logout()" class="mt-2 w-full py-1 text-[10px] bg-red-500/10 text-red-400 rounded">Đăng xuất</button>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+            <p class="px-3 text-[10px] text-slate-500 font-bold uppercase mt-2 mb-2">Danh mục File</p>
+            <a onclick="filterCat('all')" class="cat-link active" id="cat-all"><i class="fas fa-border-all w-6"></i> Tất cả</a>
+            <a onclick="filterCat('Aimlock')" class="cat-link" id="cat-Aimlock"><i class="fas fa-crosshairs w-6"></i> Aimlock</a>
+            <a onclick="filterCat('Data')" class="cat-link" id="cat-Data"><i class="fas fa-database w-6"></i> Data Game</a>
+            
+            <p class="px-3 text-[10px] text-slate-500 font-bold uppercase mt-4 mb-2">Giao dịch</p>
+            <a onclick="showPage('topup')" class="cat-link"><i class="fas fa-credit-card w-6 text-center"></i> Nạp Thẻ Cào</a>
+            <a onclick="showPage('bank')" class="cat-link text-yellow-500"><i class="fas fa-university w-6 text-center"></i> Nạp Ngân Hàng</a>
+            <a onclick="showPage('cardHistory')" class="cat-link"><i class="fas fa-history w-6 text-center"></i> Lịch Sử Nạp</a>
+            <a onclick="showPage('history')" class="cat-link"><i class="fas fa-shopping-bag w-6 text-center"></i> File Đã Mua</a>
+            
+            <div id="adminMenu" class="hidden border-t border-slate-800 mt-4 pt-4">
+                <a onclick="showPage('admin')" class="cat-link text-red-400 font-bold"><i class="fas fa-user-shield w-6"></i> QUẢN TRỊ</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="flex justify-between items-center mb-8">
+            <h2 id="pageTitle" class="text-2xl font-bold tracking-tight uppercase">Sản phẩm mới</h2>
+            <div id="headerUID" class="text-[11px] bg-slate-800/80 px-4 py-2 rounded-xl text-blue-400 border border-slate-700 font-mono">ID: -----</div>
+        </header>
+
+        <div id="page-home" class="page-view">
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <div id="page-bank" class="page-view hidden">
+            <div class="glass p-8 rounded-3xl border border-yellow-500/20 max-w-2xl mx-auto text-center">
+                <h3 class="font-bold text-lg mb-6 uppercase text-yellow-500">Chuyển khoản Ngân hàng / MOMO</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="text-left space-y-4">
+                        <div class="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                            <p class="text-[10px] text-slate-500">NGÂN HÀNG:</p>
+                            <p class="font-bold text-blue-400">VIETINBANK</p>
+                        </div>
+                        <div class="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                            <p class="text-[10px] text-slate-500">SỐ TÀI KHOẢN:</p>
+                            <p class="font-bold text-white tracking-widest">1038 7522 1386</p>
+                        </div>
+                        <div class="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                            <p class="text-[10px] text-slate-500">NỘI DUNG CHUYỂN:</p>
+                            <p class="font-bold text-yellow-500">NAP <span class="uid-fill">0000</span></p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img id="qrImg" src="https://img.vietqr.io/image/vietinbank-103875221386-compact.jpg" class="w-48 rounded-xl border-4 border-white mb-2">
+                        <p class="text-[9px] text-slate-500 italic">Quét mã để nạp nhanh</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-admin" class="page-view hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="glass p-8 rounded-3xl border border-red-500/20">
+                    <h4 class="font-bold text-red-400 mb-6 uppercase">Thêm Sản Phẩm</h4>
+                    <div class="space-y-4">
+                        <input type="text" id="admPName" placeholder="Tên sản phẩm..." class="input-dark">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" id="admPPrice" placeholder="Giá tiền..." class="input-dark">
+                            <select id="admPCat" class="input-dark">
+                                <option value="Aimlock">Aimlock</option><option value="Data">Data</option>
+                                <option value="Menu">Menu VIP</option><option value="Panel">Panel</option>
+                            </select>
+                        </div>
+                        <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-700 space-y-4">
+                            <div><label class="admin-label text-blue-400">Chọn Ảnh sản phẩm</label><input type="file" id="admPImg" accept="image/*" class="input-dark text-[10px]"></div>
+                            <div><label class="admin-label text-yellow-400">Chọn File (.zip/.apk)</label><input type="file" id="admPFile" class="input-dark text-[10px]"></div>
+                        </div>
+                        <button onclick="adminAddProduct()" class="btn-blue bg-red-600 w-full uppercase font-bold">Đăng Lên Ngay</button>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-3xl border border-green-500/20 h-fit">
+                    <h4 class="font-bold text-green-400 mb-6 uppercase text-sm">Quản lý Thành viên & Tiền</h4>
+                    <input type="text" id="admTargetUID" placeholder="Mã UID khách hàng..." class="input-dark mb-4">
+                    <input type="number" id="admAmount" placeholder="Số tiền cộng/trừ..." class="input-dark mb-4">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="adminAddMoney()" class="btn-blue bg-green-600">CỘNG TIỀN</button>
+                        <button onclick="adminSetRole()" class="btn-blue bg-orange-600">SÉT ADMIN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-topup" class="page-view hidden">
+            <div class="glass p-8 rounded-3xl border border-blue-500/10 max-w-lg mx-auto">
+                <h3 class="font-bold text-lg mb-6 text-center uppercase text-blue-400">Nạp thẻ cào tự động</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="cardNet" class="input-dark">
+                            <option value="VIETTEL">VIETTEL</option><option value="VINAPHONE">VINAPHONE</option>
+                            <option value="MOBIFONE">MOBIFONE</option><option value="VIETNAMOBILE">VIETNAMOBILE</option>
+                            <option value="GARENA">GARENA</option><option value="ZING">ZING</option>
+                            <option value="GATE">GATE</option><option value="VCOIN">VCOIN</option>
+                        </select>
+                        <select id="cardVal" class="input-dark">
+                            <option value="10000">10,000đ</option><option value="20000">20,000đ</option>
+                            <option value="30000">30,000đ</option><option value="50000">50,000đ</option>
+                            <option value="100000">100,000đ</option><option value="200000">200,000đ</option>
+                            <option value="300000">300,000đ</option><option value="500000">500,000đ</option>
+                            <option value="1000000">1,000,000đ</option>
+                        </select>
+                    </div>
+                    <input type="text" id="cardSeri" placeholder="Số Seri" class="input-dark">
+                    <input type="text" id="cardCode" placeholder="Mã thẻ" class="input-dark">
+                    <button onclick="handleCardTopup()" class="btn-blue w-full uppercase">Xác Nhận Nạp Thẻ</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-cardHistory" class="page-view hidden">
+             <div class="glass rounded-2xl overflow-x-auto border border-slate-800"><table class="w-full text-left text-xs"><thead class="bg-slate-800"><tr><th class="p-4">Ngày</th><th class="p-4">Loại</th><th class="p-4">Mệnh giá</th><th class="p-4">Trạng thái</th></tr></thead><tbody id="cardLogList"></tbody></table></div>
+        </div>
+
+        <div id="page-history" class="page-view hidden"><div id="historyList" class="grid gap-4"></div></div>
+    </main>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('b_v57_u')) || [
+            { user: 'Bofisbudevshop', pass: 'shopdevnguyenlong', role: 'admin', cash: 0, uid: 'ADMIN-MASTER', history: [], cardLogs: [] }
+        ];
+        let products = JSON.parse(localStorage.getItem('b_v57_p')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('b_v57_s')) || null;
+        let currentFilter = 'all';
+
+        window.onload = () => { updateUI(); renderProducts(); renderHistory(); renderCardLogs(); };
+
+        function sync() {
+            localStorage.setItem('b_v57_u', JSON.stringify(users));
+            localStorage.setItem('b_v57_p', JSON.stringify(products));
+            if(currentUser) localStorage.setItem('b_v57_s', JSON.stringify(currentUser));
+            else localStorage.removeItem('b_v57_s');
+        }
+
+        // --- NEW: SÉT ADMIN QUA UID ---
+        function adminSetRole() {
+            const uid = document.getElementById('admTargetUID').value;
+            if(!uid) return alert("Vui lòng nhập UID!");
+            let idx = users.findIndex(u => u.uid === uid);
+            if(idx !== -1) {
+                users[idx].role = 'admin';
+                sync();
+                alert(`Đã cấp quyền QUẢN TRỊ cho khách: ${users[idx].user}`);
+                location.reload();
+            } else alert("Không tìm thấy khách hàng với UID này.");
+        }
+
+        function adminAddMoney() {
+            const uid = document.getElementById('admTargetUID').value;
+            const amt = parseInt(document.getElementById('admAmount').value);
+            let idx = users.findIndex(u => u.uid === uid);
+            if(idx !== -1) { users[idx].cash += amt; sync(); updateUI(); alert("Đã xử lý số dư!"); } else alert("Sai UID!");
+        }
+
+        // --- UI & CORE ---
+        function updateUI() {
+            if(currentUser) {
+                const fresh = users.find(u => u.user === currentUser.user);
+                if(fresh) currentUser = fresh;
+                document.getElementById('user-section').classList.remove('hidden');
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('userNameDisplay').innerText = currentUser.user;
+                document.getElementById('userCashDisplay').innerText = currentUser.cash.toLocaleString() + "đ";
+                document.getElementById('headerUID').innerText = "ID: " + currentUser.uid;
+                
+                // Cập nhật thông tin nạp Bank
+                document.querySelectorAll('.uid-fill').forEach(e => e.innerText = currentUser.uid);
+                document.getElementById('qrImg').src = `https://img.vietqr.io/image/vietinbank-103875221386-compact.jpg?addTag=NAP%20${currentUser.uid}`;
+
+                if(currentUser.role === 'admin') document.getElementById('adminMenu').classList.remove('hidden');
+            }
+        }
+
+        function handleSideAuth() {
+            const u = document.getElementById('sideU').value.trim();
+            const p = document.getElementById('sideP').value.trim();
+            if(!u || !p) return;
+            const found = users.find(x => x.user === u && x.pass === p);
+            if(found) { currentUser = found; sync(); updateUI(); renderCardLogs(); renderHistory(); }
+            else {
+                if(users.find(x => x.user === u)) return alert("Sai mật khẩu!");
+                const uid = Math.floor(1000 + Math.random() * 9000).toString();
+                users.push({ user: u, pass: p, role: (u === 'Bofisbudevshop' ? 'admin' : 'user'), cash: 0, uid, history: [], cardLogs: [] });
+                sync(); handleSideAuth();
+            }
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + id).classList.remove('hidden');
+            if(id === 'home') filterCat(currentFilter);
+            else document.getElementById('pageTitle').innerText = id.toUpperCase();
+            if(window.innerWidth < 768) toggleSidebar();
+        }
+
+        function renderProducts() {
+            const g = document.getElementById('productGrid');
+            const list = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+            g.innerHTML = list.map(p => `
+                <div class="glass p-4 rounded-3xl border border-slate-800 relative">
+                    ${(currentUser && currentUser.role === 'admin') ? `<button onclick="deleteProduct(${p.id})" class="absolute top-2 right-2 bg-red-600/80 w-6 h-6 rounded-full text-[10px] z-10"><i class="fas fa-trash"></i></button>` : ''}
+                    <img src="${p.img}" class="w-full h-32 object-cover rounded-2xl mb-3">
+                    <h3 class="font-bold text-xs truncate">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="text-green-400 font-bold">${p.price.toLocaleString()}đ</span>
+                        <button onclick="buyProduct(${p.id})" class="bg-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">MUA</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function adminAddProduct() {
+            const n = document.getElementById('admPName').value;
+            const p = parseInt(document.getElementById('admPPrice').value);
+            const c = document.getElementById('admPCat').value;
+            const imgFile = document.getElementById('admPImg').files[0];
+            const zipFile = document.getElementById('admPFile').files[0];
+            if(!n || !imgFile || !zipFile) return alert("Thiếu dữ liệu!");
+            const toB64 = f => new Promise(res => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); });
+            products.unshift({ id: Date.now(), name: n, price: p, cat: c, img: await toB64(imgFile), file: await toB64(zipFile) });
+            sync(); alert("Đã đăng!"); location.reload();
+        }
+
+        function handleCardTopup() {
+            if(!currentUser) return alert("Đăng nhập trước!");
+            const code = document.getElementById('cardCode').value;
+            if(!code) return;
+            alert("Đã gửi thẻ lên hệ thống!");
+            setTimeout(() => {
+                const val = parseInt(document.getElementById('cardVal').value);
+                const net = document.getElementById('cardNet').value;
+                let uIdx = users.findIndex(u => u.user === currentUser.user);
+                users[uIdx].cardLogs.unshift({ date: new Date().toLocaleString(), net, val, status: "Thành công" });
+                users[uIdx].cash += val;
+                sync(); updateUI(); renderCardLogs(); alert("Nạp thành công!");
+            }, 1000);
+        }
+
+        function renderCardLogs() {
+            const list = document.getElementById('cardLogList');
+            if(!currentUser) return;
+            list.innerHTML = currentUser.cardLogs.map(l => `<tr class="border-b border-slate-800"><td class="p-4 opacity-50">${l.date}</td><td class="p-4 font-bold text-blue-400">${l.net}</td><td class="p-4 font-black">${l.val.toLocaleString()}đ</td><td class="p-4">${l.status}</td></tr>`).join('');
+        }
+
+        function buyProduct(id) {
+            if(!currentUser) return alert("Đăng nhập!");
+            const p = products.find(x => x.id === id);
+            if(currentUser.cash < p.price) return alert("Không đủ tiền!");
+            currentUser.cash -= p.price;
+            currentUser.history.unshift({ name: p.name, date: new Date().toLocaleString(), file: p.file });
+            sync(); updateUI(); alert("Thành công!");
+        }
+
+        function renderHistory() {
+            const h = document.getElementById('historyList');
+            if(!currentUser) return;
+            h.innerHTML = currentUser.history.map(i => `<div class="glass p-4 rounded-xl flex justify-between"><span>${i.name}</span><a href="${i.file}" download class="text-blue-500 font-bold">TẢI VỀ</a></div>`).join('');
+        }
+
+        function filterCat(cat) { currentFilter = cat; renderProducts(); }
+        function logout() { currentUser = null; sync(); location.reload(); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); document.getElementById('main-content').classList.toggle('full'); document.getElementById('openSidebar').classList.toggle('hidden'); }
+    </script>
+</body>
+</html>
