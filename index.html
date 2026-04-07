@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bofisbu.shopfile.site - Premium Game Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .gradient-text { background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="sticky top-0 z-50 glass-card px-6 py-4 flex justify-between items-center">
+        <div class="text-2xl font-bold gradient-text">bofisbu.shopfile.site</div>
+        <div class="hidden md:flex space-x-6 text-sm font-medium">
+            <a href="#" class="hover:text-blue-400">Trang Chủ / Home</a>
+            <a href="#products" class="hover:text-blue-400">Sản Phẩm / Products</a>
+            <a href="#topup" class="hover:text-blue-400">Nạp Tiền / Deposit</a>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="toggleModal('loginModal')" class="px-4 py-2 text-sm font-semibold border border-blue-500 rounded-lg hover:bg-blue-500/10">Đăng Nhập</button>
+            <button onclick="toggleModal('regModal')" class="px-4 py-2 text-sm font-semibold btn-primary rounded-lg">Đăng Ký</button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <section class="text-center mb-16">
+            <h1 class="text-5xl font-extrabold mb-4">Hệ Thống Data <span class="gradient-text">Aimlock & Menu</span></h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Chuyên cung cấp giải pháp tối ưu cho game thủ chuyên nghiệp. Giao dịch tự động, an toàn và bảo mật.</p>
+        </section>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+            <div class="glass-card p-4 rounded-xl text-center hover:border-blue-500 cursor-pointer">
+                <i class="fas fa-crosshairs text-2xl mb-2 text-blue-400"></i>
+                <p class="text-sm font-bold">File Aimlock</p>
+            </div>
+            <div class="glass-card p-4 rounded-xl text-center hover:border-blue-500 cursor-pointer">
+                <i class="fas fa-database text-2xl mb-2 text-purple-400"></i>
+                <p class="text-sm font-bold">Data Aimlock</p>
+            </div>
+            <div class="glass-card p-4 rounded-xl text-center hover:border-blue-500 cursor-pointer">
+                <i class="fas fa-bars text-2xl mb-2 text-green-400"></i>
+                <p class="text-sm font-bold">Menu VIP</p>
+            </div>
+            <div class="glass-card p-4 rounded-xl text-center hover:border-blue-500 cursor-pointer">
+                <i class="fas fa-desktop text-2xl mb-2 text-yellow-400"></i>
+                <p class="text-sm font-bold">Panel</p>
+            </div>
+            <div class="glass-card p-4 rounded-xl text-center hover:border-blue-500 cursor-pointer">
+                <i class="fas fa-shield-alt text-2xl mb-2 text-red-400"></i>
+                <p class="text-sm font-bold">Proxy Aim</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6" id="products">
+                <h2 class="text-2xl font-bold flex items-center"><i class="fas fa-shopping-cart mr-2"></i> Danh Sách Sản Phẩm</h2>
+                
+                <div class="glass-card p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center group">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 text-2xl">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">VIP Aimlock Data V2</h3>
+                            <p class="text-xs text-gray-500">Update: 07/04/2026 - Anti-ban 99%</p>
+                            <span class="text-green-400 font-bold text-xl">150,000đ</span>
+                        </div>
+                    </div>
+                    <button onclick="buyProduct('VIP Aimlock Data V2')" class="mt-4 md:mt-0 px-8 py-3 btn-primary rounded-xl font-bold">MUA NGAY</button>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <div class="glass-card p-6 rounded-2xl" id="topup">
+                    <h2 class="text-xl font-bold mb-4">Nạp Tiền / Deposit</h2>
+                    <div class="flex space-x-2 mb-4">
+                        <button onclick="switchTab('card')" id="tab-card" class="flex-1 py-2 bg-blue-600 rounded-lg text-sm font-bold">Thẻ Cào</button>
+                        <button onclick="switchTab('bank')" id="tab-bank" class="flex-1 py-2 bg-slate-700 rounded-lg text-sm font-bold">Ngân Hàng</button>
+                    </div>
+
+                    <div id="form-card" class="space-y-3">
+                        <select class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm outline-none">
+                            <option>Viettel</option>
+                            <option>Vinaphone</option>
+                            <option>Mobifone</option>
+                        </select>
+                        <input type="text" id="cardCode" placeholder="Mã thẻ" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm outline-none">
+                        <input type="text" id="cardSerial" placeholder="Số Seri" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm outline-none">
+                        <button onclick="submitCard()" class="w-full py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold text-sm">GỬI THẺ</button>
+                    </div>
+
+                    <div id="form-bank" class="hidden text-center space-y-4">
+                        <div class="bg-white p-2 rounded-lg inline-block">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=STK:123456789-MBBANK" alt="QR Code" class="w-32 h-32">
+                        </div>
+                        <div class="text-left text-sm space-y-2 bg-slate-800 p-4 rounded-lg">
+                            <p>Ngân hàng: <b>MB BANK</b></p>
+                            <p>STK: <b class="text-blue-400">0348609562</b></p>
+                            <p>Chủ TK: <b>BOFISBU ADMIN</b></p>
+                            <p>Nội dung: <b class="text-yellow-400">NAP [TênTàiKhoản]</b></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl">
+                    <h2 class="text-xl font-bold mb-4 text-yellow-400"><i class="fas fa-crown mr-2"></i> Top Nạp Tháng</h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-sm border-b border-slate-700 pb-2">
+                            <span>1. user_091***</span>
+                            <span class="text-blue-400 font-bold">5,000,000đ</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-b border-slate-700 pb-2">
+                            <span>2. player_vjp</span>
+                            <span class="text-blue-400 font-bold">3,200,000đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+        <div class="glass-card p-8 rounded-2xl w-full max-w-md relative">
+            <button onclick="toggleModal('loginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            <h2 class="text-2xl font-bold mb-6">Đăng Nhập</h2>
+            <input type="text" placeholder="Tên đăng nhập" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mb-4 outline-none">
+            <input type="password" placeholder="Mật khẩu" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 mb-6 outline-none">
+            <button class="w-full py-3 btn-primary rounded-lg font-bold">XÁC NHẬN</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        function switchTab(type) {
+            const cardBtn = document.getElementById('tab-card');
+            const bankBtn = document.getElementById('tab-bank');
+            const cardForm = document.getElementById('form-card');
+            const bankForm = document.getElementById('form-bank');
+
+            if (type === 'card') {
+                cardBtn.className = 'flex-1 py-2 bg-blue-600 rounded-lg text-sm font-bold';
+                bankBtn.className = 'flex-1 py-2 bg-slate-700 rounded-lg text-sm font-bold';
+                cardForm.classList.remove('hidden');
+                bankForm.classList.add('hidden');
+            } else {
+                bankBtn.className = 'flex-1 py-2 bg-blue-600 rounded-lg text-sm font-bold';
+                cardBtn.className = 'flex-1 py-2 bg-slate-700 rounded-lg text-sm font-bold';
+                bankForm.classList.remove('hidden');
+                cardForm.classList.add('hidden');
+            }
+        }
+
+        function buyProduct(name) {
+            alert("Cảm ơn bạn đã ủng hộ shop! Đang xử lý sản phẩm: " + name);
+        }
+
+        function submitCard() {
+            const code = document.getElementById('cardCode').value;
+            const serial = document.getElementById('cardSerial').value;
+            if(!code || !serial) return alert("Vui lòng nhập đầy đủ thông tin thẻ!");
+            
+            // Logic log history (Dành cho chủ shop)
+            console.log(`Thông báo cho chủ: Có thẻ mới - Mã: ${code} - Seri: ${serial}`);
+            alert("Hệ thống đã nhận thẻ và đang xử lý. Kiểm tra lịch sử nạp sau vài phút!");
+        }
+    </script>
+</body>
+</html>
