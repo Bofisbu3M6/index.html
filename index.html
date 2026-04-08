@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOFISBU.SHOPFILE.SITE | SHOP GAME FREE FIRE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #050505; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Logo & Chữ (Phần 4) */
+        .logo-text { font-size: 26px; font-weight: bold; text-shadow: 0 0 10px #3b82f6; color: #fff; }
+        
+        /* Hiệu ứng tuyết rơi chậm (Phần 4) */
+        .snowflake { position: fixed; top: -10px; color: #fff; pointer-events: none; z-index: 9999; animation: fall linear infinite; }
+        @keyframes fall { to { transform: translateY(100vh); } }
+
+        /* Bảng thông báo hình vuông (Phần 1) */
+        #welcome-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; }
+        .box-square { background: white; color: black; padding: 30px; border-radius: 4px; text-align: center; width: 320px; font-weight: bold; }
+
+        /* Sidebar bên phải */
+        .sidebar { position: fixed; right: 0; top: 100px; width: 200px; padding: 15px; background: rgba(0,0,0,0.9); border-left: 2px solid #3b82f6; }
+        .menu-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #222; transition: 0.3s; }
+        .menu-item:hover { background: #3b82f6; }
+
+        input, select { background: #111; border: 1px solid #333; color: white; padding: 10px; width: 100%; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-overlay" class="fixed inset-0 bg-black z-[20000] flex items-center justify-center">
+        <div class="glass p-8 rounded-lg w-80 text-center">
+            <h2 class="logo-text mb-6">BOFISBU SHOP</h2>
+            <input type="text" id="user" placeholder="Tên tài khoản">
+            <input type="password" id="pass" placeholder="Mật khẩu">
+            <div class="flex items-center text-xs mb-4">
+                <input type="checkbox" id="save" class="mr-2"> Lưu thông tin đăng nhập
+            </div>
+            <button onclick="handleAuth()" class="w-full bg-blue-600 py-2 rounded font-bold shadow-lg shadow-blue-500/50">ĐĂNG NHẬP / ĐĂNG KÝ</button>
+        </div>
+    </div>
+
+    <div id="welcome-modal">
+        <div class="box-square">
+            <p>CẢM ƠN BẠN ĐÃ SỬ DỤNG SHOP CỦA CHÚNG TÔI</p>
+            <p class="text-sm my-4">THỜI GIAN LÀM VIỆC TỪ 12h - 22h<br>CUỐI TUẦN 24/25</p>
+            <button onclick="closeWelcome()" class="bg-blue-600 text-white px-6 py-1 rounded">ĐÓNG</button>
+        </div>
+    </div>
+
+    <header class="h-16 glass flex items-center justify-between px-8 sticky top-0 z-50">
+        <div class="logo-text">BOFISBU SHOP</div>
+        <div class="flex gap-6">
+            <span class="text-green-400 font-bold">Tiền: <span id="money">0</span> Vnd</span>
+            <span class="text-blue-400">ID: <span id="uid">#0000</span></span>
+        </div>
+    </header>
+
+    <main class="p-10">
+        <h2 id="cat-title" class="text-2xl font-bold border-l-4 border-blue-500 pl-4 mb-8 uppercase">Aimlock</h2>
+        <div id="product-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass p-4 rounded-lg border-2 border-transparent hover:border-blue-500 transition">
+                <div class="h-40 bg-gray-800 mb-4 flex items-center justify-center">ẢNH SẢN PHẨM</div>
+                <h3 class="font-bold">File Aimlock VIP</h3>
+                <p class="text-green-400 font-bold my-2">50.000 Vnd</p>
+                <button onclick="buyProduct('File Aimlock VIP', 50000)" class="w-full bg-blue-600 py-1 rounded">MUA NGAY</button>
+            </div>
+        </div>
+
+        <div id="nap-section" class="hidden max-w-2xl mx-auto">
+            <div class="glass p-6 rounded-lg mb-6 border-t-4 border-yellow-500">
+                <h3 class="font-bold text-yellow-500 mb-4">NẠP THẺ CÀO (AUTOCRAD1S)</h3>
+                <p class="text-xs text-red-500 font-bold mb-4 italic">* Kiểm tra kỹ mệnh giá, sai mất thẻ!</p>
+                <select id="card-val"><option value="20000">20.000 Vnd</option><option value="50000">50.000 Vnd</option></select>
+                <input type="text" id="card-code" placeholder="Mã thẻ">
+                <input type="text" id="card-seri" placeholder="Số seri">
+                <button onclick="napThe()" class="w-full bg-yellow-600 py-2 rounded font-bold">NẠP THẺ</button>
+            </div>
+            <div class="glass p-6 rounded-lg border-t-4 border-green-500">
+                <h3 class="font-bold text-green-500 mb-4">CHUYỂN KHOẢN NGÂN HÀNG</h3>
+                <div class="text-sm font-bold bg-white text-black p-4 rounded">
+                    Vietcombank: 1027195845<br>
+                    Chủ: NGUYEN THANH KIEU AND NGUYEN HOANG LONG<br>
+                    Nội dung: lixi + <span id="bank-uid">0000</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="sidebar">
+        <div class="menu-item" onclick="showCat('Aimlock')">Aimlock</div>
+        <div class="menu-item" onclick="showCat('File Data')">File Data</div>
+        <div class="menu-item" onclick="showCat('Panel')">Panel</div>
+        <div class="menu-item" onclick="showCat('Menu')">Menu</div>
+        <div class="menu-item text-yellow-500" onclick="showNap()">NẠP TIỀN</div>
+        <div id="admin-tools" class="hidden mt-6 pt-4 border-t border-gray-700">
+            <p class="text-red-500 text-xs font-bold mb-2 uppercase">Quản trị viên</p>
+            <button class="text-xs bg-red-900 w-full mb-1 p-1">Thêm sản phẩm</button>
+            <button class="text-xs bg-red-900 w-full p-1">Cộng tiền UID</button>
+        </div>
+        <button onclick="location.reload()" class="w-full mt-10 bg-red-600 text-xs py-1">ĐĂNG XUẤT</button>
+    </div>
+
+    <div id="buy-confirm" class="fixed inset-0 bg-black/80 z-[30000] hidden items-center justify-center">
+        <div class="glass p-8 rounded-lg text-center">
+            <p class="mb-6 font-bold">Bạn muốn mua món này chứ?</p>
+            <div class="flex gap-4">
+                <button onclick="closeBuy()" class="bg-gray-700 px-6 py-2 rounded">HỦY</button>
+                <button id="btn-final-buy" class="bg-blue-600 px-6 py-2 rounded">MUA</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hiệu ứng tuyết rơi (Phần 4)
+        function createSnow() {
+            const container = document.body;
+            const flake = document.createElement('div');
+            flake.className = 'snowflake';
+            flake.innerHTML = '❄';
+            flake.style.left = Math.random() * 100 + 'vw';
+            flake.style.animationDuration = Math.random() * 5 + 8 + 's';
+            flake.style.opacity = Math.random();
+            container.appendChild(flake);
+            setTimeout(() => flake.remove(), 10000);
+        }
+        setInterval(createSnow, 400);
+
+        // Xử lý Auth (Phần 1)
+        function handleAuth() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(!u || !p) return alert("Vui lòng nhập đủ!");
+
+            if(u === "Shopnguyenlongdev" && p === "devnguyenlongshop") {
+                window.user = { bal: 100000000, id: "ADMIN", role: 'admin' };
+            } else {
+                window.user = { bal: 10000, id: Math.floor(1000 + Math.random()*9000), role: 'user' };
+            }
+            
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('welcome-modal').style.display = 'flex';
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('money').innerText = window.user.bal.toLocaleString();
+            document.getElementById('uid').innerText = "#" + window.user.id;
+            document.getElementById('bank-uid').innerText = window.user.id;
+            if(window.user.role === 'admin') document.getElementById('admin-tools').classList.remove('hidden');
+        }
+
+        function closeWelcome() { document.getElementById('welcome-modal').style.display = 'none'; }
+
+        // Chuyển đổi giao diện
+        function showCat(name) {
+            document.getElementById('cat-title').innerText = name;
+            document.getElementById('product-grid').classList.remove('hidden');
+            document.getElementById('nap-section').classList.add('hidden');
+        }
+
+        function showNap() {
+            document.getElementById('product-grid').classList.add('hidden');
+            document.getElementById('nap-section').classList.remove('hidden');
+        }
+
+        // Nạp thẻ (Phần 3)
+        function napThe() {
+            alert("Đang xác minh thẻ trên AUTOCRAD1S.COM (Tài khoản: bofisbudevshop)... Vui lòng chờ 2-3 phút!");
+            setTimeout(() => {
+                const val = parseInt(document.getElementById('card-val').value);
+                window.user.bal += val;
+                updateUI();
+                alert("Thẻ đúng! Tiền đã được cộng.");
+            }, 3000);
+        }
+
+        // Mua hàng (Phần 2)
+        function buyProduct(name, price) {
+            if(window.user.bal < price) {
+                alert("Số dư không đủ vui lòng nạp thêm!");
+                showNap();
+                return;
+            }
+            document.getElementById('buy-confirm').style.display = 'flex';
+            document.getElementById('btn-final-buy').onclick = () => {
+                window.user.bal -= price;
+                updateUI();
+                document.getElementById('buy-confirm').style.display = 'none';
+                alert("Cảm ơn bạn vì đã mua sản phẩm bên shop của chúng tôi!");
+            };
+        }
+        function closeBuy() { document.getElementById('buy-confirm').style.display = 'none'; }
+    </script>
+</body>
+</html>
